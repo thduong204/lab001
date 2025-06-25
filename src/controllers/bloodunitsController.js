@@ -62,14 +62,7 @@ exports.createBloodUnit = (req, res) => {
     event_id
   } = req.body;
 
-  if (
-    blood_unit_id === undefined ||
-    !blood_group_id ||
-    !component_type ||
-    status === undefined ||
-    !collection_date ||
-    !expiry_date
-  ) {
+  if (isMissingRequiredFields(blood_unit_id, blood_group_id, component_type, status, collection_date, expiry_date)) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
@@ -111,6 +104,15 @@ exports.createBloodUnit = (req, res) => {
       }
     );
   });
+};
+
+const isMissingRequiredFields = (blood_unit_id, blood_group_id, component_type, status, collection_date, expiry_date) => {
+  return blood_unit_id === undefined ||
+    !blood_group_id ||
+    !component_type ||
+    status === undefined ||
+    !collection_date ||
+    !expiry_date;
 };
 
 

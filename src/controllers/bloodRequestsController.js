@@ -87,6 +87,13 @@ exports.getMemberByCCCD = (req, res) => {
 };
 
 // 2. Tạo yêu cầu máu
+const isRequestBodyValid = (body) => {
+  const { requester_id, blood_group_id, component_type, units_required, urgency_level } = body;
+  return requester_id && blood_group_id && component_type &&
+         typeof units_required === 'number' && units_required > 0 &&
+         typeof urgency_level === 'number';
+};
+
 exports.createRequest = (req, res) => {
   const {
     requester_id,
@@ -97,13 +104,7 @@ exports.createRequest = (req, res) => {
     notes
   } = req.body;
 
-  if (
-    !requester_id ||
-    !blood_group_id ||
-    !component_type ||
-    typeof units_required !== 'number' || units_required <= 0 ||
-    typeof urgency_level !== 'number'
-  ) {
+  if (!isRequestBodyValid(req.body)) {
     return res.status(400).json({ error: 'Missing or invalid required fields' });
   }
 
@@ -195,13 +196,7 @@ exports.updateRequest = (req, res) => {
     notes
   } = req.body;
 
-  if (
-    isNaN(id) ||
-    blood_group_id === undefined || component_type === undefined ||
-    typeof units_required !== 'number' || units_required <= 0 ||
-    typeof urgency_level !== 'number' ||
-    !VALID_STATUSES.includes(status)
-  ) {
+  if (!this.validateRequestData(id, blood_group_id, component_type, units_required, urgency_level, status)) {
     return res.status(400).json({ error: 'Missing or invalid required fields' });
   }
 
@@ -226,6 +221,16 @@ exports.updateRequest = (req, res) => {
 
     res.json({ message: 'Blood request updated successfully' });
   });
+};
+
+exports.validateRequestData = (id, blood_group_id, component_type, units_required, urgency_level, status) => {
+  return !(
+    isNaN(id) ||
+    blood_group_id === undefined || component_type === undefined ||
+    typeof units_required !== 'number' || units_required <= 0 ||
+    typeof urgency_level !== 'number' ||
+    !VALID_STATUSES.includes(status)
+  );
 };
 
 // 5. Xoá yêu cầu
